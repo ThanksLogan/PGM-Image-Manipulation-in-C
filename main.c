@@ -27,7 +27,7 @@ PixelGray** rotate(PixelGray** matrix, int* width, int* height);
 //main function - DO NOT MODIFY
 int main() {
     int width, height; // variable to hold width and height. Use reference in other functions
-    PixelGray** image_original = readPGM("/Users/loganforeman/CS420_A1_foremanLogan/lenna_p5.pgm", &width, &height);
+    PixelGray** image_original = readPGM("lenna_p5.pgm", &width, &height);
 // Now you have the grayscale image data in the 'image_original' 2D array
 // Access pixel data using image[row][col].value
 // For example, to access the pixel at row=2, col=3:
@@ -69,7 +69,7 @@ PixelGray** readPGM(const char* filename, int* width, int* height){
 
     // Opens the file for reading in binary
     FILE * file = NULL;
-    file = fopen(filename, "r");
+    file = fopen(filename, "rb");
     // Handles error when opening the file
     if (file == NULL) {
         perror("Failed to Open The PGM File");
@@ -89,16 +89,6 @@ PixelGray** readPGM(const char* filename, int* width, int* height){
 
     // Skip the rest of the first line
     while (fgetc(file) != '\n');
-
-    // Read and store the second line (comment)
-    //TODO: DO NOT NEED COMMENT SECTION ANYMORE
-    /*
-    if (fgets(comment, sizeof(comment), file) == NULL) {
-        printf("Error reading comment\n");
-        fclose(file);
-        exit(1);
-    }
-    */
 
     // Read width, height, and max value from the third line
     if (fscanf(file, "%d %d\n%d", width, height, &max_val) != 3) {
@@ -150,9 +140,15 @@ PixelGray** readPGM(const char* filename, int* width, int* height){
             }
             */
             //            if (fread(&pixel, 1, 1, file) != 1) { //100000000
-            //sizeof(unsigned char) for size parameter
-            if (fread(&matrix[i][j].value, 1, 1, file) != 1) { //100000000
-                printf("Error reading pixel data\n");
+            //sizeof(unsigned char) for size parameter but dont need cus always reading 1 byte
+            if (fread(&matrix[i][j].value, 1, 1, file) != 1) { //10001000
+                if (feof(file)) {
+                    printf("End of file reached while reading pixel data\n");
+                } else if (ferror(file)) {
+                    perror("Error reading pixel data");
+                } else {
+                    printf("Unknown error reading pixel data\n");
+                }
                 fclose(file);
                 exit(1);
             }
@@ -195,11 +191,12 @@ void writePGM(const char* filename, PixelGray** matrix, int* width, int* height)
     fclose(outputFile);
 
     // Free allocated memory
+    /*
     for (int i = 0; i < *height; i++) {
         free(matrix[i]);
     }
     free(matrix);
-
+*/
 }
 
 // Function to threshold the image matrix
@@ -245,12 +242,18 @@ PixelGray** threshold(PixelGray** matrix, int* width, int* height){
             //we grab the matrix[i][j], and copy but threshold the value
             if(matrix[i][j].value > 80){
                 //printf(" _%d_ ", matrix[i][j].value);
-               threshold[i][j].value = 255;
+                threshold[i][j].value = 255;
             }else{
-               threshold[i][j].value = 0;
+                threshold[i][j].value = 0;
             }
         }
     }
+    // Before returning, free the memory allocated for the original 'matrix'
+    /*for (int i = 0; i < *height; i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
+    */
     return threshold;
     //exit(20);
 }
@@ -294,6 +297,11 @@ PixelGray** rotate(PixelGray** matrix, int* width, int* height){
             rotate[i][j].value = matrix[j][i].value;
         }
     }
-
-    return rotate;
+    // Before returning, free the memory allocated for the original 'matrix'
+    /*
+    for (int i = 0; i < *height; i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
+    */return rotate;
 }
