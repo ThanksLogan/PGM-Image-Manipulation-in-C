@@ -1,7 +1,4 @@
-/*
- * Author: Logan Foreman
- * REDID: 825056655
- */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
